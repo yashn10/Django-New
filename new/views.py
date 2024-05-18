@@ -2,20 +2,16 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout as out
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_protect
 from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password
-from .models import Category, Product, Signup, Contact
+from .models import Category, Product, Signup, Contact, CartItem
 
 # Create your views here.
 
 def home(request):
     category = Category.objects.all()
-    # cat_id = request.GET.get('category')
-
-    # if cat_id:
-    #     cat = get_object_or_404(Category, id=cat_id)
-    #     products = Product.objects.filter(category=cat)
-    # else:
     products = Product.objects.all()
 
     context = {
@@ -44,16 +40,26 @@ def contact(request):
     return render(request, 'contact.html')
 
 
-def cart(request):
-    return render(request, 'cart.html')
-
-
 def checkout(request, id):
-    product = Product.objects.filter(id=id).first
+    product = Product.objects.filter(id=id).first()
 
     context = {
         "product": product
     }
+
+    return render(request, 'checkout.html', context)
+
+
+def checkouts(request):
+
+    if request.user.is_authenticated:
+        user = request.user
+        products = CartItem.objects.filter(user=user)
+        context = {"products": products}
+        return render(request, 'checkout.html', context)
+    else:
+        return redirect('login')
+
 
     return render(request, 'checkout.html', context)
 
@@ -166,3 +172,49 @@ def detail(request, id):
     }
 
     return render(request, 'detail.html', context)
+
+
+@login_required
+def cart(request):
+    cart_items = CartItem.objects.filter(user=request.user)
+    total = sum(item.total_price for item in cart_items)
+    context = {
+        'cart_items': cart_items,
+        'total': total
+    }
+    return render(request, 'cart.html', context)
+
+
+@login_required
+def add_to_cart(request, id):
+    product = get_object_or_404(Product, id=id)
+    user = request.user
+
+    cart_item, created = CartItem.objects.get_or_create(user=user, product=product)
+
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+
+    messages.success(request, f"Added {product.name} to your cart.")
+    return redirect('detail', id=id)
+
+
+@login_required
+def remove_from_cart(request, id):
+    cart_item = get_object_or_404(CartItem, id=id, user=request.user)
+    cart_item.delete()
+    messages.success(request, "Item removed from cart.")
+    return redirect('cart')
+
+
+@login_required
+@csrf_protect
+def update_cart(request, id):
+    if request.method == 'POST':
+        cart_item = get_object_or_404(CartItem, id=id, user=request.user)
+        quantity = request.POST.get('quantity', cart_item.quantity)
+        cart_item.quantity = quantity
+        cart_item.save()
+        return redirect('cart')
+    return render(request, 'cart.html')
