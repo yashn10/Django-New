@@ -22,7 +22,9 @@
         <div class="col-lg-7 mb-5">
             <div class="contact-form bg-light p-30">
                 <div id="success"></div>
-                <form name="sentMessage" id="contactForm" novalidate="novalidate" method='post'>
+
+                <form novalidate="novalidate" method='POST' action='/login/'>
+                    {% csrf_token %}
 
                     <div class="control-group">
                         <input type="email" class="form-control" id="email" name="email" placeholder="Your Email"
@@ -34,11 +36,21 @@
                             required="required" data-validation-required-message="Please enter your password" />
                         <p class="help-block text-danger"></p>
                     </div>
+
+                    {% if messages %}
+                        <ul>
+                            {% for message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
                     
                     <div>
-                        <button class="btn btn-primary py-2 px-4" type="submit" id="sendMessageButton">Login</button>
+                        <button class="btn btn-primary py-2 px-4" type="submit">Login</button>
                     </div>
                 </form>
+
             </div>
         </div>
         

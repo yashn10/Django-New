@@ -22,9 +22,10 @@
         <div class="col-lg-7 mb-5">
             <div class="contact-form bg-light p-30">
                 <div id="success"></div>
+
                 <form novalidate="novalidate" action='/signup/' method='POST'>
                     {% csrf_token %}
-
+            
                     <div class="control-group">
                         <input type="text" class="form-control" id="name" name="name" placeholder="Your Name"
                             required="required" data-validation-required-message="Please enter your name" />
@@ -36,7 +37,7 @@
                         <p class="help-block text-danger"></p>
                     </div>
                     <div class="control-group">
-                        <input type="number" class="form-control" id="contact" name="contact" placeholder="Your Contact Number"
+                        <input type="text" class="form-control" id="contact" name="contact" placeholder="Your Contact Number"
                             required="required" data-validation-required-message="Please enter your contact number" />
                         <p class="help-block text-danger"></p>
                     </div>
@@ -48,13 +49,19 @@
                     
                     <div>
                         <button class="btn btn-primary py-2 px-4" type="submit">Signup</button>
-                        <button class="btn btn-success py-2 px-4">
-                            <a href="/login/">
-                                Login
-                            </a>
-                        </button>
+                        <a href="/login/" class="btn btn-success py-2 px-4">Login</a>
                     </div>
                 </form>
+            
+                <!-- Display messages -->
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                
             </div>
         </div>
         

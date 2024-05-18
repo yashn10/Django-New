@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import RegexValidator
 
 # Create your models here.
 
@@ -32,9 +33,9 @@ class Product(models.Model):
 
 class Signup(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField(max_length=50)
-    contact = models.IntegerField()
-    password = models.CharField(max_length=10)
+    email = models.EmailField(max_length=50, unique=True)
+    contact = models.CharField(max_length=15, validators=[RegexValidator(r'^\+?1?\d{9,15}$')])
+    password = models.CharField(max_length=128)  # Increase length to store hashed passwords
     registration_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
