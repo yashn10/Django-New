@@ -22,10 +22,6 @@ def home(request):
     return render(request, 'home.html', context)
 
 
-def about(request):
-    return render(request, 'detail.html')
-
-
 def contact(request):
     if request.method == 'POST':
         name = request.POST.get('name')
